@@ -22,7 +22,7 @@ def members():
 def webhook():
     if request.method == 'POST':
         repo = '/home/maulanafanny/process-server'
-        process = subprocess.Popen(f'cd {repo} && git pull && pa_reload_webapp.py maulanafanny.pythonanywhere.com', stdout=subprocess.PIPE, shell=True)
+        process = subprocess.Popen(f'cd {repo} && git pull', stdout=subprocess.PIPE, shell=True)
         output, error = process.communicate()
 
         if process.returncode != 0:

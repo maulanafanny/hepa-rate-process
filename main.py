@@ -1,12 +1,10 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import subprocess
 
-# import pandas as pd
-# import numpy as np
-# from sklearn.cluster import AgglomerativeClustering
-# from sklearn.preprocessing import MinMaxScaler
-# from sklearn.feature_selection import SelectKBest
-# from sklearn.feature_selection import chi2
+import pandas as pd
+import numpy as np
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.preprocessing import MinMaxScaler
 
 app = Flask(__name__)
 
@@ -32,5 +30,28 @@ def webhook():
     else:
         return '', 400
 
+@app.route("/clustering", methods=['POST'])
+def clustering():
+    req = request.get_json()
+    df = pd.DataFrame(req['dataset'])
+
+    # clear the console
+    # subprocess.call('cls', shell=True)
+
+    features = df[['total_case', 'clean_water_rate', 'safe_house_rate', 'total_population', 'sanitation_rate']]
+    scaler = MinMaxScaler(feature_range = (0, 1)).set_output(transform='pandas')
+    features = scaler.fit_transform(features)
+
+    # selected_features = features.iloc[:,[0,1,2,3,4]]
+
+    clustering = AgglomerativeClustering(n_clusters=3, linkage='ward')
+    clusters = clustering.fit_predict(features)
+
+    data = {
+        'cluster': clusters.tolist()
+    }
+
+    return jsonify(data)
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=3333)
